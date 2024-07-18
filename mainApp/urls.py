@@ -9,4 +9,5 @@ urlpatterns = [
     path('subCategories/<int:subCategory_id>/details/', SubCategoryDetailsAPIView.as_view()),
 
     path('products/', ProductsAPIView.as_view()),
+    path('products/<int:product_id>/details/', ProductDetailsAPIView.as_view()),
 ]

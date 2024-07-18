@@ -1,5 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -171,4 +172,11 @@ class ProductsAPIView(APIView):
                 products = products.order_by('-created_at')
 
         serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
+
+class ProductDetailsAPIView(APIView):
+    def get(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+        serializer = ProductSerializer(product)
         return Response(serializer.data)
