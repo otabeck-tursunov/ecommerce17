@@ -30,3 +30,9 @@ class FavoritePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ('id', 'product', 'created_at')
+
+
+class RatePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rate
+        fields = ('product', 'score')

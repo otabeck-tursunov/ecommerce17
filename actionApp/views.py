@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.generics import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.db.models import Avg
 
 from userApp.permissions import IsRegularUser
 from .serializers import *
@@ -52,3 +53,26 @@ class FavoriteRemoveAPIView(APIView):
         favorite = get_object_or_404(Favorite, pk=pk)
         favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RateCreateAPIView(APIView):
+    permission_classes = [IsRegularUser]
+
+    @swagger_auto_schema(
+        request_body=RatePostSerializer
+    )
+    def post(self, request):
+        serializer = RatePostSerializer(data=request.data)
+        if Rate.objects.filter(user=request.user, product_id=request.data['product']).exists():
+            return Response({
+                "success": False,
+                "message": "This product already exists."
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            product = get_object_or_404(Product, id=serializer.data['product'])
+            avg_rating = Rate.objects.filter(product=product).aggregate(Avg('score'))
+            product.rating = avg_rating.get('score__avg')
+            product.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
